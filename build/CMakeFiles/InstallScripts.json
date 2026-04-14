@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/hobbes/Documents/CarND-Path-Planning-Project/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

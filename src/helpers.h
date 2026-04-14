@@ -154,4 +154,40 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s,
   return {x,y};
 }
 
+// Check if there's a car in the target lane within safe distance
+bool isLaneSafe(int target_lane, double car_s, const std::vector<std::vector<double>> &sensor_fusion, 
+                double look_ahead = 60.0, double look_behind = 20.0) {
+  for (int i = 0; i < sensor_fusion.size(); i++) {
+    double d = sensor_fusion[i][6];
+    // Check if car is in target lane (each lane is 4m wide, centered at 2, 6, 10)
+    if (d < (2 + 4*target_lane + 2) && d > (2 + 4*target_lane - 2)) {
+      double vx = sensor_fusion[i][3];
+      double vy = sensor_fusion[i][4];
+      double check_speed = sqrt(vx*vx + vy*vy);
+      double check_car_s = sensor_fusion[i][5];
+      
+      // Check collision within look_ahead and look_behind distances
+      if ((check_car_s > car_s - look_behind) && (check_car_s < car_s + look_ahead)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+// Find closest car in front in a given lane
+double getClosestCarDistance(int check_lane, double car_s, const std::vector<std::vector<double>> &sensor_fusion) {
+  double closest_dist = 1000.0;
+  for (int i = 0; i < sensor_fusion.size(); i++) {
+    double d = sensor_fusion[i][6];
+    if (d < (2 + 4*check_lane + 2) && d > (2 + 4*check_lane - 2)) {
+      double check_car_s = sensor_fusion[i][5];
+      if (check_car_s > car_s && (check_car_s - car_s) < closest_dist) {
+        closest_dist = check_car_s - car_s;
+      }
+    }
+  }
+  return closest_dist;
+}
+
 #endif  // HELPERS_H
